@@ -26,7 +26,7 @@ title: 番茄和茄子                         # the main title
 tagline: 这里是番茄智的博客～   # it will display as the sub-title
 
 description: >-                        # used by seo meta and the atom feed
-    这是通过Chirpy主题配置而成的
+    这是通过Chirpy主题配置而成
 
 # fill in the protocol & hostname for your site, e.g., 'https://username.github.io'
 url: ''
