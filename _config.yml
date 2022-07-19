@@ -21,7 +21,7 @@ timezone:
 # jekyll-seo-tag settings › https://github.com/jekyll/jekyll-seo-tag/blob/master/docs/usage.md
 # ↓ --------------------------
 
-title: 番茄和茄子                         # the main title
+title: 番茄智                         # the main title
 
 tagline: 这里是番茄智的博客～   # it will display as the sub-title
 
@@ -35,17 +35,17 @@ github:
   username: liudezhiya             # change to your github username
 
 twitter:
-  username: twitter_username            # change to your twitter username
+  username: liudezhi            # change to your twitter username
 
 social:
   # Change to your full name.
   # It will be displayed as the default author of the posts and the copyright owner in the Footer
-  name: tomstillcoding
-  email: example@doamin.com             # change to your email address
+  name: liudezhiya
+  email: 2451456574@qq.com             # change to your email address
   links:
     # The first element serves as the copyright owner's link
     - https://twitter.com/username      # change to your twitter homepage
-    - https://github.com/username       # change to your github homepage
+    - https://github.com/liudezhiya       # change to your github homepage
     # Uncomment below to add more social links
     # - https://www.facebook.com/username
     # - https://www.linkedin.com/in/username
