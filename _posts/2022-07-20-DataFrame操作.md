@@ -1,4 +1,3 @@
----
 title: DataFrame操作
 date: 2022-07-20 11:34:00 +0800
 categories: [随笔]
@@ -16,15 +15,340 @@ image:
   src: /assets/blog_res/2021-03-30-hello-world.assets/huoshan.jpg!
   alt: 签约成功
 
----
-
 ###  
 
 [TOC]
 
+# DataFrame基本函数整理
+
+###  构造函数 
+
+```
+DataFrame([data, index, columns, dtype, copy]) #构造数据
+
+创建 DataFrame 的四种方法
+①创建一个空的数据框架
+import pandas as pd
+df = pd.DataFrame()
+②从列表进行创建
+data = [1,2,3,4,5]
+df = pd.DataFrame(data) # 将列表数据转化为 一列
+data = [['Alex',10],['Bob',12],['Clarke',13]]
+df = pd.DataFrame(data,columns=['Name','Age']) # 将第一维度数据转为为行，第二维度数据转化为列，即 3 行 2 列，并设置列标签
+data = [['Alex',10],['Bob',12],['Clarke',13]]
+df = pd.DataFrame(data,columns=['Name','Age'],dtype=float) # 将数字元素 自动转化为 浮点数
+③从 ndarrays / Lists 的 字典创建
+data = {'Name':['Tom', 'Jack', 'Steve', 'Ricky'],'Age':[28,34,29,42]} # 两组列元素，并且个数需要相同
+df = pd.DataFrame(data) # 这里默认的 index 就是 range(n)，n 是列表的长度
+data = {'Name':['Tom', 'Jack', 'Steve', 'Ricky'],'Age':[28,34,29,42]}
+df = pd.DataFrame(data, index=['rank1','rank2','rank3','rank4']) # 这里设定了 index 个数要和列表长度一致
+④从 字典组成的列表 创建
+data = [{'a': 1, 'b': 2},{'a': 5, 'b': 10, 'c': 20}] # 列表对应的是第一维，即行，字典为同一行不同列元素
+df = pd.DataFrame(data) # 第 1 行 3 列没有元素，自动添加 NaN (Not a Number)
+   a   b     c
+0  1   2   NaN
+1  5  10  20.0
+取特定的表头下的列元素
+data = [{'a': 1, 'b': 2},{'a': 5, 'b': 10, 'c': 20}]
+
+#With two column indices, values same as dictionary keys
+df1 = pd.DataFrame(data, index=['first', 'second'], columns=['a', 'b']) # 指定表头都存在于 data，只取部分
+
+#With two column indices with one index with other name
+df2 = pd.DataFrame(data, index=['first', 'second'], columns=['a', 'b1']) # 指定表头中 b1 不存在，添加 b1 列，元素 NaN
+print(df1)
+print(df2)
+        a   b
+first   1   2
+second  5  10
+        a  b1
+first   1 NaN
+second  5 NaN
+⑤从 Series 组成的字典 创建
+d = {'one' : pd.Series([1, 2, 3], index=['a', 'b', 'c']),
+   'two' : pd.Series([1, 2, 3, 4], index=['a', 'b', 'c', 'd'])}
+# index 与序列长度相投
+# 字典不同的 key 代表一个列的表头，pd.Series 作为 value 作为该列的元素
+df = pd.DataFrame(d)
+print(df)
+   one  two
+a  1.0    1
+b  2.0    2
+c  3.0    3
+d  NaN    4
+```
 
 
-### pandas常用的数据查看方法有 
+
+### 属性和数据
+
+```python
+DataFrame.axes                                #index: 行标签；columns: 列标签
+DataFrame.as_matrix([columns])                #转换为矩阵
+DataFrame.dtypes                              #返回数据的类型
+DataFrame.ftypes                              #返回每一列的 数据类型float64:dense
+DataFrame.get_dtype_counts()                  #返回数据框数据类型的个数
+DataFrame.get_ftype_counts()                  #返回数据框数据类型float64:dense的个数
+DataFrame.select_dtypes([include, include])   #根据数据类型选取子数据框
+DataFrame.values                              #Numpy的展示方式
+DataFrame.axes                                #返回横纵坐标的标签名
+DataFrame.ndim                                #返回数据框的纬度
+DataFrame.size                                #返回数据框元素的个数
+DataFrame.shape                               #返回数据框的形状
+DataFrame.memory_usage()                      #每一列的存储
+```
+
+### 类型转换
+
+```
+DataFrame.astype(dtype[, copy, errors])       #转换数据类型
+DataFrame.copy([deep])                        #deep深度复制数据
+DataFrame.isnull()                            #以布尔的方式返回空值
+DataFrame.notnull()                           #以布尔的方式返回非空值
+```
+
+### 索引和迭代
+
+```python
+DataFrame.head([n])                           #返回前n行数据
+DataFrame.at                                  #快速标签常量访问器
+DataFrame.iat                                 #快速整型常量访问器
+DataFrame.loc                                 #标签定位，使用名称
+DataFrame.iloc                                #整型定位，使用数字
+DataFrame.insert(loc, column, value)          #在特殊地点loc[数字]插入column[列名]某列数据
+DataFrame.iter()                              #Iterate over infor axis
+DataFrame.iteritems()                         #返回列名和序列的迭代器
+DataFrame.iterrows()                          #返回索引和序列的迭代器
+DataFrame.itertuples([index, name])           #Iterate over DataFrame rows as namedtuples, with index value as first element of the tuple.
+DataFrame.lookup(row_labels, col_labels)      #Label-based “fancy indexing” function for DataFrame.
+DataFrame.pop(item)                           #返回删除的项目
+DataFrame.tail([n])                           #返回最后n行
+DataFrame.xs(key[, axis, level, drop_level])  #Returns a cross-section (row(s) or column(s)) from the Series/DataFrame.
+DataFrame.isin(values)                        #是否包含数据框中的元素
+DataFrame.where(cond[, other, inplace, …])    #条件筛选
+DataFrame.mask(cond[, other, inplace, …])     #Return an object of same shape as self and whose corresponding entries are from self where cond is False and otherwise are from other.
+DataFrame.query(expr[, inplace])              #Query the columns of a frame with a boolean expression.
+```
+
+### 二元运算
+
+```python
+DataFrame.add(other[,axis,fill_value])        #加法，元素指向
+DataFrame.sub(other[,axis,fill_value])        #减法，元素指向
+DataFrame.mul(other[, axis,fill_value])       #乘法，元素指向
+DataFrame.div(other[, axis,fill_value])       #小数除法，元素指向
+DataFrame.truediv(other[, axis, level, …])    #真除法，元素指向
+DataFrame.floordiv(other[, axis, level, …])   #向下取整除法，元素指向
+DataFrame.mod(other[, axis,fill_value])       #模运算，元素指向
+DataFrame.pow(other[, axis,fill_value])       #幂运算，元素指向
+DataFrame.radd(other[, axis,fill_value])      #右侧加法，元素指向
+DataFrame.rsub(other[, axis,fill_value])      #右侧减法，元素指向
+DataFrame.rmul(other[, axis,fill_value])      #右侧乘法，元素指向
+DataFrame.rdiv(other[, axis,fill_value])      #右侧小数除法，元素指向
+DataFrame.rtruediv(other[, axis, …])          #右侧真除法，元素指向
+DataFrame.rfloordiv(other[, axis, …])         #右侧向下取整除法，元素指向
+DataFrame.rmod(other[, axis,fill_value])      #右侧模运算，元素指向
+DataFrame.rpow(other[, axis,fill_value])      #右侧幂运算，元素指向
+DataFrame.lt(other[, axis, level])            #类似Array.lt
+DataFrame.gt(other[, axis, level])            #类似Array.gt
+DataFrame.le(other[, axis, level])            #类似Array.le
+DataFrame.ge(other[, axis, level])            #类似Array.ge
+DataFrame.ne(other[, axis, level])            #类似Array.ne
+DataFrame.eq(other[, axis, level])            #类似Array.eq
+DataFrame.combine(other,func[,fill_value, …]) #Add two DataFrame objects and do not propagate NaN values, so if for a
+DataFrame.combine_first(other)                #Combine two DataFrame objects and default to non-null values in frame calling the method.
+```
+
+### 函数应用&分组&窗口
+
+```python
+DataFrame.apply(func[, axis, broadcast, …])   #应用函数
+DataFrame.applymap(func)                      #Apply a function to a DataFrame that is intended to operate elementwise, i.e.
+DataFrame.aggregate(func[, axis])             #Aggregate using callable, string, dict, or list of string/callables
+DataFrame.transform(func, *args, **kwargs)    #Call function producing a like-indexed NDFrame
+DataFrame.groupby([by, axis, level, …])       #分组
+DataFrame.rolling(window[, min_periods, …])   #滚动窗口
+DataFrame.expanding([min_periods, freq, …])   #拓展窗口
+DataFrame.ewm([com, span, halflife,  …])      #指数权重窗口
+```
+
+### 描述统计学
+
+```python
+DataFrame.abs()                               #返回绝对值
+DataFrame.all([axis, bool_only, skipna])      #Return whether all elements are True over requested axis
+DataFrame.any([axis, bool_only, skipna])      #Return whether any element is True over requested axis
+DataFrame.clip([lower, upper, axis])          #Trim values at input threshold(s).
+DataFrame.clip_lower(threshold[, axis])       #Return copy of the input with values below given value(s) truncated.
+DataFrame.clip_upper(threshold[, axis])       #Return copy of input with values above given value(s) truncated.
+DataFrame.corr([method, min_periods])         #返回本数据框成对列的相关性系数
+DataFrame.corrwith(other[, axis, drop])       #返回不同数据框的相关性
+DataFrame.count([axis, level, numeric_only])  #返回非空元素的个数
+DataFrame.cov([min_periods])                  #计算协方差
+DataFrame.cummax([axis, skipna])              #Return cumulative max over requested axis.
+DataFrame.cummin([axis, skipna])              #Return cumulative minimum over requested axis.
+DataFrame.cumprod([axis, skipna])             #返回累积
+DataFrame.cumsum([axis, skipna])              #返回累和
+DataFrame.describe([percentiles,include, …])  #整体描述数据框
+DataFrame.diff([periods, axis])               #1st discrete difference of object
+DataFrame.eval(expr[, inplace])               #Evaluate an expression in the context of the calling DataFrame instance.
+DataFrame.kurt([axis, skipna, level, …])      #返回无偏峰度Fisher’s  (kurtosis of normal == 0.0).
+DataFrame.mad([axis, skipna, level])          #返回偏差
+DataFrame.max([axis, skipna, level, …])       #返回最大值
+DataFrame.mean([axis, skipna, level, …])      #返回均值
+DataFrame.median([axis, skipna, level, …])    #返回中位数
+DataFrame.min([axis, skipna, level, …])       #返回最小值
+DataFrame.mode([axis, numeric_only])          #返回众数
+DataFrame.pct_change([periods, fill_method])  #返回百分比变化
+DataFrame.prod([axis, skipna, level, …])      #返回连乘积
+DataFrame.quantile([q, axis, numeric_only])   #返回分位数
+DataFrame.rank([axis, method, numeric_only])  #返回数字的排序
+DataFrame.round([decimals])                   #Round a DataFrame to a variable number of decimal places.
+DataFrame.sem([axis, skipna, level, ddof])    #返回无偏标准误
+DataFrame.skew([axis, skipna, level, …])      #返回无偏偏度
+DataFrame.sum([axis, skipna, level, …])       #求和
+DataFrame.std([axis, skipna, level, ddof])    #返回标准误差
+DataFrame.var([axis, skipna, level, ddof])    #返回无偏误差 
+```
+
+### 从新索引&选取&标签操作
+
+```python
+DataFrame.add_prefix(prefix)                  #添加前缀
+DataFrame.add_suffix(suffix)                  #添加后缀
+DataFrame.align(other[, join, axis, level])   #Align two object on their axes with the
+DataFrame.drop(labels[, axis, level, …])      #返回删除的列
+DataFrame.drop_duplicates([subset, keep, …])  #Return DataFrame with duplicate rows removed, optionally only
+DataFrame.duplicated([subset, keep])          #Return boolean Series denoting duplicate rows, optionally only
+DataFrame.equals(other)                       #两个数据框是否相同
+DataFrame.filter([items, like, regex, axis])  #过滤特定的子数据框
+DataFrame.first(offset)                       #Convenience method for subsetting initial periods of time series data based on a date offset.
+DataFrame.head([n])                           #返回前n行
+DataFrame.idxmax([axis, skipna])              #Return index of first occurrence of maximum over requested axis.
+DataFrame.idxmin([axis, skipna])              #Return index of first occurrence of minimum over requested axis.
+DataFrame.last(offset)                        #Convenience method for subsetting final periods of time series data based on a date offset.
+DataFrame.reindex([index, columns])           #Conform DataFrame to new index with optional filling logic, placing NA/NaN in locations having no value in the previous index.
+DataFrame.reindex_axis(labels[, axis, …])     #Conform input object to new index with optional filling logic, placing NA/NaN in locations having no value in the previous index.
+DataFrame.reindex_like(other[, method, …])    #Return an object with matching indices to myself.
+DataFrame.rename([index, columns])            #Alter axes input function or functions.
+DataFrame.rename_axis(mapper[, axis, copy])   #Alter index and / or columns using input function or functions.
+DataFrame.reset_index([level, drop, …])       #For DataFrame with multi-level index, return new DataFrame with labeling information in the columns under the index names, defaulting to ‘level_0’, ‘level_1’, etc.
+DataFrame.sample([n, frac, replace, …])       #返回随机抽样
+DataFrame.select(crit[, axis])                #Return data corresponding to axis labels matching criteria
+DataFrame.set_index(keys[, drop, append ])    #Set the DataFrame index (row labels) using one or more existing columns.
+DataFrame.tail([n])                           #返回最后几行
+DataFrame.take(indices[, axis, convert])      #Analogous to ndarray.take
+DataFrame.truncate([before, after, axis ])    #Truncates a sorted NDFrame before and/or after some particular index value.
+```
+
+### 处理缺失值
+
+```python
+DataFrame.dropna([axis, how, thresh, …])      #Return object with labels on given axis omitted where alternately any
+DataFrame.fillna([value, method, axis, …])    #填充空值
+DataFrame.replace([to_replace, value, …])     #Replace values given in ‘to_replace’ with ‘value’.
+```
+
+### 删除某列空值所在的行
+
+```
+data.dropna(how = 'all')    # 传入这个参数后将只丢弃全为缺失值的那些行
+data.dropna(axis = 1)       # 丢弃有缺失值的列（一般不会这么做，这样会删掉一个特征）
+data.dropna(axis=1,how="all")   # 丢弃全为缺失值的那些列
+data.dropna(axis=0,subset = ["Age", "Sex"])   # 丢弃‘Age’和‘Sex’这两列中有缺失值的行
+```
+
+
+
+### 从新定型&排序&转变形态
+
+```python
+DataFrame.pivot([index, columns, values])     #Reshape data (produce a “pivot” table) based on column values.
+DataFrame.reorder_levels(order[, axis])       #Rearrange index levels using input order.
+DataFrame.sort_values(by[, axis, ascending])  #Sort by the values along either axis
+DataFrame.sort_index([axis, level, …])        #Sort object by labels (along an axis)
+DataFrame.nlargest(n, columns[, keep])        #Get the rows of a DataFrame sorted by the n largest values of columns.
+DataFrame.nsmallest(n, columns[, keep])       #Get the rows of a DataFrame sorted by the n smallest values of columns.
+DataFrame.swaplevel([i, j, axis])             #Swap levels i and j in a MultiIndex on a particular axis
+DataFrame.stack([level, dropna])              #Pivot a level of the (possibly hierarchical) column labels, returning a DataFrame (or Series in the case of an object with a single level of column labels) having a hierarchical index with a new inner-most level of row labels.
+DataFrame.unstack([level, fill_value])        #Pivot a level of the (necessarily hierarchical) index labels, returning a DataFrame having a new level of column labels whose inner-most level consists of the pivoted index labels.
+DataFrame.melt([id_vars, value_vars, …])      #“Unpivots” a DataFrame from wide format to long format, optionally
+DataFrame.T                                   #Transpose index and columns
+DataFrame.to_panel()                          #Transform long (stacked) format (DataFrame) into wide (3D, Panel) format.
+DataFrame.to_xarray()                         #Return an xarray object from the pandas object.
+DataFrame.transpose(*args, **kwargs)          #Transpose index and columns
+
+Combining& joining&merging
+DataFrame.append(other[, ignore_index, …])    #追加数据
+DataFrame.assign(**kwargs)                    #Assign new columns to a DataFrame, returning a new object (a copy) with all the original columns in addition to the new ones.
+DataFrame.join(other[, on, how, lsuffix, …])  #Join columns with other DataFrame either on index or on a key column.
+DataFrame.merge(right[, how, on, left_on, …]) #Merge DataFrame objects by performing a database-style join operation by columns or indexes.
+DataFrame.update(other[, join, overwrite, …]) #Modify DataFrame in place using non-NA values from passed DataFrame.
+```
+
+### 时间序列
+
+```python
+DataFrame.asfreq(freq[, method, how, …])      #将时间序列转换为特定的频次
+DataFrame.asof(where[, subset])               #The last row without any NaN is taken (or the last row without
+DataFrame.shift([periods, freq, axis])        #Shift index by desired number of periods with an optional time freq
+DataFrame.first_valid_index()                 #Return label for first non-NA/null value
+DataFrame.last_valid_index()                  #Return label for last non-NA/null value
+DataFrame.resample(rule[, how, axis, …])      #Convenience method for frequency conversion and resampling of time series.
+DataFrame.to_period([freq, axis, copy])       #Convert DataFrame from DatetimeIndex to PeriodIndex with desired
+DataFrame.to_timestamp([freq, how, axis])     #Cast to DatetimeIndex of timestamps, at beginning of period
+DataFrame.tz_convert(tz[, axis, level, copy]) #Convert tz-aware axis to target time zone.
+DataFrame.tz_localize(tz[, axis, level, …])   #Localize tz-naive TimeSeries to target time zone.
+```
+
+### 作图
+
+````python
+DataFrame.plot([x, y, kind, ax, ….])          #DataFrame plotting accessor and method
+DataFrame.plot.area([x, y])                   #面积图Area plot
+DataFrame.plot.bar([x, y])                    #垂直条形图Vertical bar plot
+DataFrame.plot.barh([x, y])                   #水平条形图Horizontal bar plot
+DataFrame.plot.box([by])                      #箱图Boxplot
+DataFrame.plot.density(**kwds)                #核密度Kernel Density Estimate plot
+DataFrame.plot.hexbin(x, y[, C, …])           #Hexbin plot
+DataFrame.plot.hist([by, bins])               #直方图Histogram
+DataFrame.plot.kde(**kwds)                    #核密度Kernel Density Estimate plot
+DataFrame.plot.line([x, y])                   #线图Line plot
+DataFrame.plot.pie([y])                       #饼图Pie chart
+DataFrame.plot.scatter(x, y[, s, c])          #散点图Scatter plot
+DataFrame.boxplot([column, by, ax, …])        #Make a box plot from DataFrame column optionally grouped by some columns or
+DataFrame.hist(data[, column, by, grid, …])   #Draw histogram of the DataFrame’s series using matplotlib / pylab.
+````
+
+转换为其他格式
+
+```python
+DataFrame.from_csv(path[, header, sep, …])    #Read CSV file (DEPRECATED, please use pandas.read_csv() instead).
+DataFrame.from_dict(data[, orient, dtype])    #Construct DataFrame from dict of array-like or dicts
+DataFrame.from_items(items[,columns,orient])  #Convert (key, value) pairs to DataFrame.
+DataFrame.from_records(data[, index, …])      #Convert structured or record ndarray to DataFrame
+DataFrame.info([verbose, buf, max_cols, …])   #Concise summary of a DataFrame.
+DataFrame.to_pickle(path[, compression, …])   #Pickle (serialize) object to input file path.
+DataFrame.to_csv([path_or_buf, sep, na_rep])  #Write DataFrame to a comma-separated values (csv) file
+DataFrame.to_hdf(path_or_buf, key, **kwargs)  #Write the contained data to an HDF5 file using HDFStore.
+DataFrame.to_sql(name, con[, flavor, …])      #Write records stored in a DataFrame to a SQL database.
+DataFrame.to_dict([orient, into])             #Convert DataFrame to dictionary.
+DataFrame.to_excel(excel_writer[, …])         #Write DataFrame to an excel sheet
+DataFrame.to_json([path_or_buf, orient, …])   #Convert the object to a JSON string.
+DataFrame.to_html([buf, columns, col_space])  #Render a DataFrame as an HTML table.
+DataFrame.to_feather(fname)                   #write out the binary feather-format for DataFrames
+DataFrame.to_latex([buf, columns, …])         #Render an object to a tabular environment table.
+DataFrame.to_stata(fname[, convert_dates, …]) #A class for writing Stata binary dta files from array-like objects
+DataFrame.to_msgpack([path_or_buf, encoding]) #msgpack (serialize) object to input file path
+DataFrame.to_sparse([fill_value, kind])       #Convert to SparseDataFrame
+DataFrame.to_dense()                          #Return dense representation of NDFrame (as opposed to sparse)
+DataFrame.to_string([buf, columns, …])        #Render a DataFrame to a console-friendly tabular output.
+DataFrame.to_clipboard([excel, sep])          #Attempt to write text representation of object to the system clipboard 
+```
+
+
+
+### p andas常用的数据查看方法有 
 
 | 方法       | 操作                  | 结果              |
 | ---------- | --------------------- | ----------------- |
@@ -99,6 +423,10 @@ for alldata_filename in alldata_filenames:
 ```
  import re
  awardnamelinelist=re.split(r'[;, ]]',awardname)
+ 
+ re.split(pattern, string, maxsplit=0, flags=0) #maxsplit为最大分割次数，flags为正则表达式用到的通用标志：
+  re.split(r'[,:;]', s)
+  re.split(r'([,:;])', s)
 ```
 
 ### 将中文姓名转为英文姓名
@@ -263,7 +591,7 @@ inplace：布尔值，默认为False，是否直接在原数据上删除重复�
 
 
 
-更换列名
+更改列名
 
 ```
 # 更换列名，同时显示出来
@@ -691,6 +1019,500 @@ random.expovariate(0.2) #生成一个指数分布的随机数，均值为 5
     np.random.uniform(1, 10, [2,2])#生成 [1, 10] 内的均匀分布随机数， 2 行 2 列
     np.random.normal(5, 1, [2,2]) #生成一个正态分布的随机数，均值为 5， 标准差为 1， 2 行 2 列
     np.random.poisson(5, [2,2]) #生成一个泊松分布的随机数，均值为 5， 2 行 2 列
-    np.random.exponential(5, [2,2])生成一个指数分布的随机数，均值为 5， 2 行 2 列
+    np.random.exponential(5, [2,2])#生成一个指数分布的随机数，均值为 5， 2 行 2 列
+```
+
+三，生成随机字符串
+
+```
+  s = string.ascii_letters+string.digits# string.ascii_letters大小写字母
+  a=[random.choice(s) for i in range(1000)]
+  b=[random.choice(s) for i in range(1000)]
+```
+
+
+
+
+
+
+
+# 遍历dataframe
+
+|                        |                                |
+| ---------------------- | ------------------------------ |
+| DataFrame.iterrows()   | 按行顺序优先，接着依次按列迭代 |
+| DataFrame.iteritems()  | 按列顺序优先，接着依次按行迭代 |
+| DataFrame.itertuples() | 按行顺序优先，接着依次按列迭代 |
+
+## 按行遍历
+
+通过for迭代df.iterrows接口，idx是输出DataFrame内部的索引值,data输出每行单元格的值
+
+```python3
+for idx,data in df.iterrows():
+    print("[{}]: {}".format(idx,data))
+
+for date, row in df.iterrows():
+    print(date)
+
+
+```
+
+ 按行优先的遍历方式，还有itertuples( )函数，它将返回一个生成器，该生成器以元组生成行值。 
+
+```text
+for data in df.itertuples():
+    print(data)
+    
+for row in df.itertuples():
+    print(getattr(row, 'c1'), getattr(row, 'c2'))
+```
+
+## 按列遍历
+
+现在，要遍历此DataFrame，我们将使用items( )或iteritems( )函数：
+
+```python3
+or colName,data in df.items():
+    print("colName:[{}]\ndata:{}".format(colName,data))
+```
+
+ 如果我们按列优先，仅遍历某一行依次遍历所有列 
+
+```python3
+for colName,data in df.iteritems():
+    print("colName:[{}]\ndata:{}".format(colName,data[2]))
+    
+for date, row in df.iteritems():
+    print(row[0], row[1], row[2])
+```
+
+ 按行遍历的iterrows的性能是最差的，而按行遍历返回tuple的方式性能是最好的，其次是按列遍历的i考虑的teritems是可以考虑的 
+
+
+
+```
+def valuation_formula(x, y):    return str(x) + str(y)data['price'] = data.apply(lambda row: valuation_formula(row['Author-作者'], row['Organ-单位']), axis=1)
+```
+
+## python DataFrame的合并方法
+
+#### inner（默认）
+
+**使用来自两个数据集的键的交集**
+
+```python
+df_merge = pd.merge(df1, df2, on='id')
+```
+
+#### outer
+
+**使用来自两个数据集的键的并集**
+
+```python
+df_merge = pd.merge(df1, df2, on='id', how="outer")
+```
+
+#### left
+
+使用来自左数据集的键
+
+```python
+df_merge = pd.merge(df1, df2, on='id', how='left')
+```
+
+#### right
+
+使用来自右数据集的键
+
+```python
+df_merge = pd.merge(df1, df2, on='id', how='right')
+```
+
+```python
+df_merge = pd.merge(df1, df2, on='id')
+```
+
+ 依然按照默认的Inner方式，使用来自两个数据集的键的交集。且重复的键的行会在合并结果中体现为多行 
+
+# [concat](https://so.csdn.net/so/search?q=concat&spm=1001.2101.3001.7020)()
+
+    pd.concat(objs, axis=0, join=‘outer’, ignore_index:bool=False,keys=None,levels=None,names=None, verify_integrity:bool=False,sort:bool=False,copy:bool=True)
+
+| 参数         | 描述                                                         |
+| ------------ | ------------------------------------------------------------ |
+| objs         | Series，DataFrame或Panel对象的序列或映射                     |
+| axis         | 默认为0，表示列。如果为1则表示行。                           |
+| join         | 默认为"outer"，也可以为"inner"                               |
+| ignore_index | 默认为False，表示保留索引（不忽略）。设为True则表示忽略索引。 |
+
+```python
+dfs = [df1, df2, df3]
+result = pd.concat(dfs)
+```
+
+ 如果想要在合并后，标记一下数据都来自于哪张表或者数据的某类别，则也可以给concat加上 **参数keys** 。 
+
+```python
+result = pd.concat(dfs, keys=['table1', 'table2', 'table3'])
+```
+
+ 此时，添加的keys与原来的index组成元组，共同成为新的index。 
+
+## 2.横向表合并（行对齐）
+
+当axis为默认值0时：
+
+```python
+result = pd.concat([df1, df2])
+```
+
+**横向合并需要将axis设置为1** ：
+
+```python
+result = pd.concat([df1, df2], axis=1)
+```
+
+- axis=0时，即默认纵向合并时，如果出现重复的行，则会同时体现在结果中
+- axis=1时，即横向合并时，如果出现重复的列，则会同时体现在结果中。
+
+## 3.交叉合并
+
+```python
+result = pd.concat([df1, df2], axis=1, join='inner')
+```
+
+
+
+# Python DataFrame 添加行名和列名
+
+这里想要给第一行，也就是[‘a’, ‘b’]
+
+```python
+data.index.name = 'index'
+```
+
+## numpy.matmul
+
+ 原型: `numpy.matmul(a, b, out=None)` 
+
+两个numpy数组的矩阵相乘
+(1). 如果两个参数 a , b a,b a,b都是 2 2 2维的，做普通的矩阵相乘。
+
+ numpy.dot(a,b,out=None) 两个array之间的点乘 
+
+对于array对象，*和np.multiply函数代表的是数量积，如果希望使用矩阵的乘法规则，则应该调用np.dot和np.matmul函数。
+
+对于matrix对象，*直接代表了原生的矩阵乘法，而如果特殊情况下需要使用数量积，则应该使用np.multiply函数。
+
+# **np.argsort()**
+
+```sql
+np.argsort(a, axis=-1, kind='quicksort', order=None)
+```
+
+ 函数功能：将a中的元素从小到大排列，提取其在排列前对应的index(索引)输出。 
+
+
+
+
+
+# 提取日期时间列的年份
+
+```python
+#注意：数据类型需为Datetime 类型，不满足需要先转换。
+import pandas as pd
+import numpy as np
+import datetime
+df=pd.read_csv("")
+df['Time']= pd.to_datetime(df['Time']) 
+
+#1 pandas.Series.dt.year() 和 pandas.Series.dt.month() 方法提取月份和年份
+df['Year'] = df1['Time'].dt.year 
+df['Month'] = df1['Time'].dt.month 
+print(df)
+
+#2 strftime() 方法提取年份和月份
+df['Time']= pd.to_datetime(df['Time']) 
+df['year'] = df['Time'].dt.strftime('%Y')
+df['month'] = df['Time'].dt.strftime('%m')
+print(df)
+
+
+#3 pandas.DatetimeIndex.month与pandas.DatetimeIndex.year提取
+df['year'] = pd.DatetimeIndex(df['Time']).year
+df['month'] = pd.DatetimeIndex(df['Time']).month
+
+
+
+```
+
+# 获取dataframe列名
+
+ **通过columns字段获取，返回一个numpy型的array** 
+
+```
+df.columns.values
+```
+
+```
+df.columns.tolist()
+```
+
+```
+s=pd.Series(df.columns.values)
+new_columns = pd.DataFrame(s.str.split('-').tolist())[0].tolist()
+s.str.split('-')拆分列名
+s.str.split('-').tolist()转为列表
+pd.DataFrame(s.str.split('-').tolist())[0]转为dataframe取第一列
+pd.DataFrame(s.str.split('-').tolist())[0].tolist()转为新列名列表
+```
+
+### 修改单个列名
+
+```
+data=data.rename(columns={'name':'id'})
+```
+
+
+
+
+
+获取文件列表
+
+```
+import os
+def list_dir(file_dir,list_csv = []):
+    '''
+    # 递归获取.*,.csv文件存入到list_csv
+    :param file_dir: 文件路径
+    :param list_csv: 存放路径列表
+    :return:list_csv
+    '''
+    dir_list = os.listdir(file_dir)
+    for cur_file in dir_list:#cur_file文件名
+        path = os.path.join(file_dir, cur_file)
+        # 判断是文件夹还是文件
+        if os.path.isfile(path):
+            # print("{0} : is file!".format(cur_file))
+            dir_files = os.path.join(file_dir, cur_file)
+        # 判断是否存在.csv文件，如果存在则获取路径信息写入到list_csv列表中
+        # if os.path.splitext(path)[1] == '.csv':
+        if os.path.splitext(path)[1] == '.xls':
+            csv_file = os.path.join(file_dir, cur_file)
+            # print(os.path.join(file_dir, cur_file))
+            # print(cur_file)
+            list_csv.append(csv_file)
+        if os.path.isdir(path):
+            # print("{0} : is dir".format(cur_file))
+            # print(os.path.join(file_dir, cur_file))
+            list_dir(path)
+    return list_csv
+```
+
+解决dataframe 列拆分最后一位为空问题
+
+```\
+data = data.fillna('Nan;')
+sss=data['Author'].apply(lambda x: x.split(';')[0:-1])
+```
+
+# pandas 计数函数value_counts()
+
+完整版函数
+
+```python
+value_counts(normalize=False, sort=True, ascending=False, bins=None, dropna=True)
+```
+
+参数:
+
+```python
+1.normalize : boolean, default False　默认false，如为true，则以百分比的形式显示
+
+2.sort : boolean, default True　默认为true,会对结果进行排序
+
+3.ascending : boolean, default False　默认降序排序
+
+4.bins : integer, 格式(bins=1),意义不是执行计算，而是把它们分成半开放的数据集合，只适用于数字数据
+
+5.dropna : boolean, default True　默认删除na值
+```
+
+
+
+### np.linalg.norm()用于求范数，linalg本意为linear(线性) + algebra(代数)，norm则表示范数。
+
+用法
+
+    np.linalg.norm(x, ord=None, axis=None, keepdims=False)
+
+ 1.x: 表示矩阵(一维数据也是可以的~)
+ 2.ord: 表示范数类型 
+
+ **矩阵的向量**：
+ ord=1：表示求列和的最大值
+ ord=2：|λE-ATA|=0，求特征值，然后求最大特征值得算术平方根
+ ord=∞：表示求行和的最大值
+ ord=None：表示求整体的矩阵元素平方和，再开根号
+ 3.axis： 
+
+| 参数 | 含义                                       |
+| ---- | ------------------------------------------ |
+| 0    | 表示按列向量来进行处理，求多个列向量的范数 |
+| 1    | 表示按行向量来进行处理，求多个行向量的范数 |
+| None | 表示整个矩阵的范数                         |
+
+ 4.keepdims：表示是否保持矩阵的二位特性，True表示保持，False表示不保持，默认为False 
+
+# np.transpose函数
+
+ anspose函数主要用来转换[矩阵](https://so.csdn.net/so/search?q=矩阵&spm=1001.2101.3001.7020)的维度。 
+
+
+
+# 数据编码
+
+数值型数据
+
+- 自定义函数 + 循环遍历
+
+- 自定义函数 + map
+
+- 自定义函数 + apply
+
+  ```
+  df3 = df.copy()
+  df3["Score_Label"] = df3["Score"].apply(lambda x: "A" if x > 90 else (
+      "B" if 90 > x >= 80 else ("C" if 80 > x >= 70 else ("D" if 70 > x >= 60 else "E"))))
+  ```
+
+  
+
+- 使用 pd.cut
+
+  ```
+  df4 = df.copy()
+  bins = [0, 59, 70, 80, 100]
+  df4["Score_Label"] = pd.cut(df4["Score"], bins)
+  
+  df4["Score_Label_new"] = pd.cut(df4["Score"], bins, labels=[
+                                  "low", "middle", "good", "perfect"])
+  ```
+
+  使用 sklearn 二值化
+
+  ```
+  df5 = df.copy()
+  binerize = Binarizer(threshold = 60)
+  trans = binerize.fit_transform(np.array(df1["Score"]).reshape(-1,1))
+  df5["Score_Label"] = trans
+  ```
+  
+  
+
+文本型数据
+
+- 使用 replace
+
+  ```
+  df6 = df.copy()
+  df6["Sex_Label"] = df6["Sex"].replace(["Male","Female"],[0,1]) 
+  
+  df6 = df.copy()
+  value = df6["Course Name"].value_counts()
+  value_map = dict((v, i) for i,v in enumerate(value.index))
+  df6["Course Name_Label"] = df6.replace({"Course Name":value_map})["Course Name"]
+  ```
+
+- ### 使用map
+
+  ```
+  
+  df7 = df.copy()
+  Map = {elem:index for index,elem in enumerate(set(df["Course Name"]))}
+  df7["Course Name_Label"] = df7["Course Name"].map(Map)
+  
+  ②
+  name_dict = node.set_index('id')['name'].to_dict()
+  depname_dict = node.set_index('id')['depname'].to_dict()
+  weight_dict = node.set_index('id')['weight'].to_dict()
+  
+  data['Organ_Label'] = data['depname'].map(Map)映射key元数据，valuse 映射的
+  ```
+  
+  #### 使用astype
+  
+  ```
+  df8 = df.copy()
+  value = df8["Course Name"].astype("category")
+  df8["Course Name_Label"] = value.cat.codes
+  ```
+  
+  #### 使用 sklearn   LabelEncoder
+  
+  ```
+  from sklearn.preprocessing import LabelEncoder
+  df9 = df.copy()
+  le = LabelEncoder()
+  le.fit(df9["Sex"])
+  df9["Sex_Label"] = le.transform(df9["Sex"])
+  le.fit(df9["Course Name"])
+  df9["Course Name_Label"] = le.transform(df9["Course Name"])
+  
+  df9 = df.copy()
+  le = OrdinalEncoder()
+  le.fit(df9[["Sex","Course Name"]])
+  df9[["Sex_Label","Course Name_Label"]] = le.transform(df9[["Sex","Course Name"]])
+  ```
+  
+  ### 使用factorize
+  
+  ```
+  edge['target_number']=pd.factorize(edge["target"])[0].astype(int)
+  edge['index']=pd.factorize(edge["target"])[1].astype(int)
+  
+  df10 = df.copy()
+  cat_columns = df10.select_dtypes(["object"]).columns
+  
+  df10[["Sex_Label", "Course Name_Label"]] = df10[cat_columns].apply(
+      lambda x: pd.factorize(x)[0])
+  
+  ```
+
+## 判断数据类型
+
+```
+if isinstance (num, int):
+elif isinstance (num, float):
+```
+
+# 异常
+
+```
+import pandas as pd
+
+dates=range(20161010,20161114)
+pieces=[]
+for date in dates:
+    try:
+        data=pd.read_csv('A_stock/overview-push-%d/stock overview.csv' %date, encoding='gbk')
+        pieces.append(data)
+    except Exception as e:
+        pass
+    continue
+data=pd.concat(pieces)
+
+
+try:
+	##'有可能出现异常的代码放在这里'
+except:
+	##'当try中的代码出错时，执行这里的代码，代码写在这里'
+try:
+	##'有可能出现异常的代码放在这里'
+except:
+	pass
+	continue
+##在这里写继续执行新的语句
 ```
 
