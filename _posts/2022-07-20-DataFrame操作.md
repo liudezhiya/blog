@@ -1460,6 +1460,8 @@ value_counts(normalize=False, sort=True, ascending=False, bins=None, dropna=True
   le.fit(df9["Course Name"])
   df9["Course Name_Label"] = le.transform(df9["Course Name"])
   
+  
+  from sklearn.preprocessing import LabelEncoder, OrdinalEncoder
   df9 = df.copy()
   le = OrdinalEncoder()
   le.fit(df9[["Sex","Course Name"]])
@@ -1514,5 +1516,16 @@ except:
 	pass
 	continue
 ##在这里写继续执行新的语句
+```
+
+# Python对字典进行排序并返回字典
+
+```python
+import operator
+dic_instance = {3: 1, 2: 23, 1: 17}
+sort_key_dic_instance = dict(sorted(dic_instance.items(), key=operator.itemgetter(0)))  #按照key值升序
+sort_val_dic_instance = dict(sorted(dic_instance.items(), key=operator.itemgetter(1)))  #按照value值升序
+print(sort_key_dic_instance)  # output:{1: 17, 2: 23, 3: 1}
+print(sort_val_dic_instance)  # output:{3: 1, 1: 17, 2: 23}
 ```
 

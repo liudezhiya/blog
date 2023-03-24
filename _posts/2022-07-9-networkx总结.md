@@ -156,3 +156,21 @@ df_degree_weight.to_csv('..//anquanCoutput//degree_weight_independent.csv',index
 print(G.nodes.data())#这里data()里面可以加单个 节点属性，本质是字典，选择对应的值 返回节点id 和选择属性的元组构成的列表
 ```
 
+输出图的邻接矩阵
+
+```
+print(nx.adjacency_matrix(G))
+  (0, 1)	4
+  (0, 2)	5
+  (0, 3)	3
+  (0, 4)	3
+  (0, 5)	3
+  (0, 6)	3
+  (0, 7)	2
+A=np.array(nx.adjacency_matrix(G).todense())
+print(A)
+[[0 4 5 ... 2 0 0]
+ [4 0 6 ... 0 0 0]
+ [5 6 0 ... 0 2 0]]
+```
+
